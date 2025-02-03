@@ -29,7 +29,7 @@ router.post("/users", async (req, res) => {
   try {
     await User.create(req.body);
     res.set("Location", "/");
-    res.status(201).json({ message: "Account successfully created!" });
+    res.status(201).json({ message: "User successfully created!" });
   } catch (error) {
     if (
       error.name === "SequelizeValidationError" ||
@@ -93,12 +93,31 @@ router.post("/courses", authenticateUser, async (req, res) => {
   }
 });
 
-// Route that creates a new course.
+// Route that updates a course.
 router.put("/courses/:id", authenticateUser, async (req, res) => {
   const id = req.params.id;
   try {
     await Course.update(req.body, { where: { id: id } });
-    res.status(204).json({ message: "Course updated successfully!" });
+    res.status(204).json({ message: "Course successfully updated!" });
+  } catch (error) {
+    if (
+      error.name === "SequelizeValidationError" ||
+      error.name === "SequelizeUniqueConstraintError"
+    ) {
+      const errors = error.errors.map((err) => err.message);
+      res.status(400).json({ errors });
+    } else {
+      throw error;
+    }
+  }
+});
+
+// Route that deletes a course.
+router.delete("/courses/:id", authenticateUser, async (req, res) => {
+  const id = req.params.id;
+  try {
+    await Course.destroy({ where: { id: id } });
+    res.status(204).json({ message: "Course successfully deleted!" });
   } catch (error) {
     if (
       error.name === "SequelizeValidationError" ||
