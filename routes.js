@@ -16,10 +16,10 @@ router.get(
     const user = req.currentUser;
 
     res.json({
+      id: user.id,
       firstName: user.firstName,
       lastName: user.lastName,
       emailAddress: user.emailAddress,
-      password: user.password,
     });
   })
 );
@@ -51,7 +51,15 @@ router.get(
       include: [
         {
           model: User,
+          attributes: ["id", "firstName", "lastName", "emailAddress"],
         },
+      ],
+      attributes: [
+        "id",
+        "title",
+        "description",
+        "estimatedTime",
+        "materialsNeeded",
       ],
     });
     res.json(courses);
@@ -67,7 +75,15 @@ router.get(
       include: [
         {
           model: User,
+          attributes: ["id", "firstName", "lastName", "emailAddress"],
         },
+      ],
+      attributes: [
+        "id",
+        "title",
+        "description",
+        "estimatedTime",
+        "materialsNeeded",
       ],
     });
     res.json(course);
@@ -96,18 +112,27 @@ router.post("/courses", authenticateUser, async (req, res) => {
 // Route that updates a course.
 router.put("/courses/:id", authenticateUser, async (req, res) => {
   const id = req.params.id;
-  try {
-    await Course.update(req.body, { where: { id: id } });
-    res.status(204).json({ message: "Course successfully updated!" });
-  } catch (error) {
-    if (
-      error.name === "SequelizeValidationError" ||
-      error.name === "SequelizeUniqueConstraintError"
-    ) {
-      const errors = error.errors.map((err) => err.message);
-      res.status(400).json({ errors });
-    } else {
-      throw error;
+  const authUserId = req.currentUser.dataValues.id;
+  const course = await Course.findByPk(id, {
+    attributes: ["userId"],
+  });
+  const userId = course.dataValues.userId;
+  if (authUserId !== userId) {
+    res.status(403).json({ message: "Invalid Owner" });
+  } else {
+    try {
+      await Course.update(req.body, { where: { id: id } });
+      res.status(204).json({ message: "Course successfully updated!" });
+    } catch (error) {
+      if (
+        error.name === "SequelizeValidationError" ||
+        error.name === "SequelizeUniqueConstraintError"
+      ) {
+        const errors = error.errors.map((err) => err.message);
+        res.status(400).json({ errors });
+      } else {
+        throw error;
+      }
     }
   }
 });
@@ -115,18 +140,27 @@ router.put("/courses/:id", authenticateUser, async (req, res) => {
 // Route that deletes a course.
 router.delete("/courses/:id", authenticateUser, async (req, res) => {
   const id = req.params.id;
-  try {
-    await Course.destroy({ where: { id: id } });
-    res.status(204).json({ message: "Course successfully deleted!" });
-  } catch (error) {
-    if (
-      error.name === "SequelizeValidationError" ||
-      error.name === "SequelizeUniqueConstraintError"
-    ) {
-      const errors = error.errors.map((err) => err.message);
-      res.status(400).json({ errors });
-    } else {
-      throw error;
+  const authUserId = req.currentUser.dataValues.id;
+  const course = await Course.findByPk(id, {
+    attributes: ["userId"],
+  });
+  const userId = course.dataValues.userId;
+  if (authUserId !== userId) {
+    res.status(403).json({ message: "Invalid Owner" });
+  } else {
+    try {
+      await Course.destroy({ where: { id: id } });
+      res.status(204).json({ message: "Course successfully deleted!" });
+    } catch (error) {
+      if (
+        error.name === "SequelizeValidationError" ||
+        error.name === "SequelizeUniqueConstraintError"
+      ) {
+        const errors = error.errors.map((err) => err.message);
+        res.status(400).json({ errors });
+      } else {
+        throw error;
+      }
     }
   }
 });
