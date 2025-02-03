@@ -93,4 +93,23 @@ router.post("/courses", authenticateUser, async (req, res) => {
   }
 });
 
+// Route that creates a new course.
+router.put("/courses/:id", authenticateUser, async (req, res) => {
+  const id = req.params.id;
+  try {
+    await Course.update(req.body, { where: { id: id } });
+    res.status(204).json({ message: "Course updated successfully!" });
+  } catch (error) {
+    if (
+      error.name === "SequelizeValidationError" ||
+      error.name === "SequelizeUniqueConstraintError"
+    ) {
+      const errors = error.errors.map((err) => err.message);
+      res.status(400).json({ errors });
+    } else {
+      throw error;
+    }
+  }
+});
+
 module.exports = router;
