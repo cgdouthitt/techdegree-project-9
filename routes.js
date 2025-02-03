@@ -29,7 +29,7 @@ router.post("/users", async (req, res) => {
   try {
     await User.create(req.body);
     res.set("Location", "/");
-    res.status(201).json({ message: "User successfully created!" });
+    res.status(201).json();
   } catch (error) {
     if (
       error.name === "SequelizeValidationError" ||
@@ -95,7 +95,7 @@ router.post("/courses", authenticateUser, async (req, res) => {
   try {
     const newCourse = await Course.create(req.body);
     res.set("Location", `/courses/${newCourse.id}`);
-    res.status(201).json({ message: "Course successfully created!" });
+    res.status(201).json();
   } catch (error) {
     if (
       error.name === "SequelizeValidationError" ||
@@ -122,7 +122,7 @@ router.put("/courses/:id", authenticateUser, async (req, res) => {
   } else {
     try {
       await Course.update(req.body, { where: { id: id } });
-      res.status(204).json({ message: "Course successfully updated!" });
+      res.status(204).json();
     } catch (error) {
       if (
         error.name === "SequelizeValidationError" ||
@@ -150,7 +150,7 @@ router.delete("/courses/:id", authenticateUser, async (req, res) => {
   } else {
     try {
       await Course.destroy({ where: { id: id } });
-      res.status(204).json({ message: "Course successfully deleted!" });
+      res.status(204).json();
     } catch (error) {
       if (
         error.name === "SequelizeValidationError" ||
