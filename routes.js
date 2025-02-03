@@ -75,10 +75,10 @@ router.get(
 );
 
 // Route that creates a new course.
-router.post("/courses", async (req, res) => {
+router.post("/courses", authenticateUser, async (req, res) => {
   try {
-    await Course.create(req.body);
-    res.set("Location", "/courses/");
+    const newCourse = await Course.create(req.body);
+    res.set("Location", `/courses/${newCourse.id}`);
     res.status(201).json({ message: "Course successfully created!" });
   } catch (error) {
     if (
